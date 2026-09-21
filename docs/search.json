@@ -1,0 +1,65 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "How Does Age Affect Soccer Player Performance?",
+    "section": "",
+    "text": "In professional soccer, understanding how an athlete’s age relates to on-field production is vital for roster construction, tactical planning, and player valuation. This project examines the relationship between player age and offensive output across Europe’s top five domestic leagues (Premier League, La Liga, Serie A, Bundesliga, and Ligue 1) during the 2025–2026 season.\nOur primary performance metric is goal contributions per 90 minutes, calculated as:\n\\[\\text{Goal Contributions per 90} = \\frac{\\text{Goals} + \\text{Assists}}{\\text{90s Played}}\\]\nNormalizing per 90 minutes allows us to compare players who logged different total amounts of playing time across the season."
+  },
+  {
+    "objectID": "index.html#project-overview",
+    "href": "index.html#project-overview",
+    "title": "How Does Age Affect Soccer Player Performance?",
+    "section": "",
+    "text": "In professional soccer, understanding how an athlete’s age relates to on-field production is vital for roster construction, tactical planning, and player valuation. This project examines the relationship between player age and offensive output across Europe’s top five domestic leagues (Premier League, La Liga, Serie A, Bundesliga, and Ligue 1) during the 2025–2026 season.\nOur primary performance metric is goal contributions per 90 minutes, calculated as:\n\\[\\text{Goal Contributions per 90} = \\frac{\\text{Goals} + \\text{Assists}}{\\text{90s Played}}\\]\nNormalizing per 90 minutes allows us to compare players who logged different total amounts of playing time across the season."
+  },
+  {
+    "objectID": "index.html#age-vs.-goal-contributions",
+    "href": "index.html#age-vs.-goal-contributions",
+    "title": "How Does Age Affect Soccer Player Performance?",
+    "section": "Age vs. Goal Contributions",
+    "text": "Age vs. Goal Contributions\nTotal observations analyzed: 2,783 players.\n\n\n\n\n\n\n\n\nFigure 1: Scatterplot of player age versus goal contributions per 90 minutes across Europe’s top five leagues, with a LOESS smooth trend line.\n\n\n\n\n\n\nInterpreting the Pattern\nThe scatterplot above displays all 2,783 player records from the 2025–2026 season. The LOESS smoothing curve indicates a modest peak in average goal contributions in the mid-to-late twenties, followed by a slight decline into the thirties.\nImportant note on correlation vs. causation: This graphic shows an observational association, not a causal relationship. Age itself does not determine a player’s goal contribution rate. Factors such as tactical position, team strength, survivor bias (only elite older players remain in top leagues), and role specialization heavily influence these numbers.\n\n\nData Source\nData was retrieved from Kaggle: Football Players Statistics (2025–2026) by Hubert Sidorowicz, sourced from FBref."
+  },
+  {
+    "objectID": "story.html",
+    "href": "story.html",
+    "title": "When Does Performance Peak?",
+    "section": "",
+    "text": "A central question in sports analytics is identifying when athletes reach their peak competitive performance. Using data from Europe’s top five leagues during the 2025–2026 season, this analysis examines how offensive output relates to age among regular contributors.\nTo prevent small playing-time samples from skewing the metric, we restrict our sample to players who accumulated at least 450 minutes (equivalent to five full 90-minute matches). This leaves 1,999 qualifying player observations.\nPlayers are grouped into five standard career stages: 17–20, 21–24, 25–28, 29–32, and 33+."
+  },
+  {
+    "objectID": "story.html#investigating-peak-age-in-european-soccer",
+    "href": "story.html#investigating-peak-age-in-european-soccer",
+    "title": "When Does Performance Peak?",
+    "section": "",
+    "text": "A central question in sports analytics is identifying when athletes reach their peak competitive performance. Using data from Europe’s top five leagues during the 2025–2026 season, this analysis examines how offensive output relates to age among regular contributors.\nTo prevent small playing-time samples from skewing the metric, we restrict our sample to players who accumulated at least 450 minutes (equivalent to five full 90-minute matches). This leaves 1,999 qualifying player observations.\nPlayers are grouped into five standard career stages: 17–20, 21–24, 25–28, 29–32, and 33+."
+  },
+  {
+    "objectID": "story.html#aggregate-performance-across-age-groups",
+    "href": "story.html#aggregate-performance-across-age-groups",
+    "title": "When Does Performance Peak?",
+    "section": "Aggregate Performance Across Age Groups",
+    "text": "Aggregate Performance Across Age Groups\nAt first glance, an unstratified comparison suggests that overall goal contribution rates remain fairly flat across early adulthood before tapering in older age brackets.\n\n\n\n\n\n\n\n\nFigure 1: Distribution of goal contributions per 90 across career age brackets. White diamonds mark the group means.\n\n\n\n\n\nAcross all positions combined, the mean goal contribution rate is 0.25 per 90 for players aged 17–20 (\\(n = 204\\)), 0.22 for ages 21–24 (\\(n = 644\\)) and 25–28 (\\(n = 678\\)), 0.21 for ages 29–32 (\\(n = 339\\)), and 0.17 for players 33 and older (\\(n = 134\\))."
+  },
+  {
+    "objectID": "story.html#accounting-for-tactical-position",
+    "href": "story.html#accounting-for-tactical-position",
+    "title": "When Does Performance Peak?",
+    "section": "Accounting for Tactical Position",
+    "text": "Accounting for Tactical Position\nLooking strictly at overall numbers hides a substantial confounding variable: playing position. Different positions have fundamentally different tactical duties and age curves.\n\n\n\n\n\n\n\n\nFigure 2: Mean goal contributions per 90 broken down by player position and age bracket.\n\n\n\n\n\n\nAnalysis & Key Findings\nWhen we disaggregate by position, the true offensive trajectory becomes clear. For forwards, who carry primary responsibility for goal creation, productivity actually peaks in the 29–32 age bracket with an average of 0.53 goal contributions per 90 minutes, compared to 0.49 for ages 25–28, 0.40 for ages 21–24, and 0.48 for veteran forwards aged 33+. Midfielders remain remarkably consistent throughout their twenties and thirties (averaging between 0.23 and 0.28 G+A per 90), while defenders (0.08–0.10) and goalkeepers (near zero) have low goal involvement regardless of age.\nThe apparent decline in the aggregate graph is largely an artifact of positional composition. Goalkeepers make up 19.4% of all qualifying players aged 33+, but represent under 2% of players aged 17–20. Because goalkeepers and central defenders have longer careers than outfield sprinters, older age brackets naturally contain a much higher proportion of defensive players who rarely score, depressing the overall group average.\n\n\nLimitations & Causal Considerations\nIt is essential not to interpret these empirical patterns as proof that age directly causes changes in soccer performance:\n\nSelection & Survivor Bias: Older players who continue earning regular playing time (450+ minutes) in Europe’s top five leagues are elite survivors. We only observe the veterans good enough to stay in top leagues, not those whose performance declined and transferred to lower divisions.\nMeasurement Limitations: Goals and assists measure direct offensive end-product, but soccer performance involves press resistance, positioning, defensive recoveries, and stamina—attributes that may peak at different ages.\nSingle-Season Cross-Section: These data represent a single season snapshot (2025–2026) rather than a longitudinal cohort tracking individual athletes over their entire careers.\n\n\n\nData Source\nData was retrieved from Kaggle: Football Players Statistics (2025–2026) by Hubert Sidorowicz, sourced from FBref."
+  },
+  {
+    "objectID": "explore.html",
+    "href": "explore.html",
+    "title": "Explore the Data: Interactive Player Explorer",
+    "section": "",
+    "text": "Use the interactive visualization below to investigate how individual player performance varies with age across Europe’s top five domestic soccer leagues during the 2025–2026 season.\n\n\n\nFilter by League & Position: Use the dropdown filters below to narrow the players shown. You can choose one or more leagues and positions, or leave them empty to view all players.\nHover for Details: Move your cursor over any marker to see the player’s name, age, squad, league, position, minutes played, goals, assists, and goal contributions per 90.\nZoom & Pan: Click and drag on any region of the plot to zoom in. Use the top-right Plotly toolbar to pan, or double-click anywhere on the plot area to reset the zoom.\n\n\n\n\n\n\n\nFilter by League:\n\n\n\n\n\n\nFilter by Position:\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nData was retrieved from Kaggle: Football Players Statistics (2025–2026) by Hubert Sidorowicz, sourced from FBref."
+  },
+  {
+    "objectID": "explore.html#interactive-player-explorer",
+    "href": "explore.html#interactive-player-explorer",
+    "title": "Explore the Data: Interactive Player Explorer",
+    "section": "",
+    "text": "Use the interactive visualization below to investigate how individual player performance varies with age across Europe’s top five domestic soccer leagues during the 2025–2026 season.\n\n\n\nFilter by League & Position: Use the dropdown filters below to narrow the players shown. You can choose one or more leagues and positions, or leave them empty to view all players.\nHover for Details: Move your cursor over any marker to see the player’s name, age, squad, league, position, minutes played, goals, assists, and goal contributions per 90.\nZoom & Pan: Click and drag on any region of the plot to zoom in. Use the top-right Plotly toolbar to pan, or double-click anywhere on the plot area to reset the zoom.\n\n\n\n\n\n\n\nFilter by League:\n\n\n\n\n\n\nFilter by Position:\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nData was retrieved from Kaggle: Football Players Statistics (2025–2026) by Hubert Sidorowicz, sourced from FBref."
+  }
+]

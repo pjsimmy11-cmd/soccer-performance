@@ -1,0 +1,145 @@
+---
+title: "When Does Performance Peak?"
+---
+
+## Investigating Peak Age in European Soccer
+
+A central question in sports analytics is identifying when athletes reach their peak competitive performance. Using data from Europe's top five leagues during the 2025–2026 season, this analysis examines how offensive output relates to age among regular contributors. 
+
+To prevent small playing-time samples from skewing the metric, we restrict our sample to players who accumulated **at least 450 minutes** (equivalent to five full 90-minute matches). This leaves **1,999 qualifying player observations**.
+
+Players are grouped into five standard career stages: **17–20**, **21–24**, **25–28**, **29–32**, and **33+**.
+
+```{r}
+#| label: setup-story
+#| echo: false
+#| message: false
+#| warning: false
+
+library(readr)
+library(dplyr)
+library(ggplot2)
+
+players_raw <- read_csv("data/players_data_light-2025_2026.csv", show_col_types = FALSE)
+
+qualified_players <- players_raw |>
+  filter(!is.na(Age), !is.na(Gls), !is.na(Ast), !is.na(`90s`), `90s` > 0, Min >= 450) |>
+  mutate(
+    ga_per_90 = (Gls + Ast) / `90s`,
+    age_group = case_when(
+      Age <= 20 ~ "17–20",
+      Age <= 24 ~ "21–24",
+      Age <= 28 ~ "25–28",
+      Age <= 32 ~ "29–32",
+      TRUE ~ "33+"
+    ),
+    age_group = factor(age_group, levels = c("17–20", "21–24", "25–28", "29–32", "33+")),
+    pos_label = case_when(
+      grepl("^FW", Pos) ~ "Forwards",
+      grepl("^MF", Pos) ~ "Midfielders",
+      grepl("^DF", Pos) ~ "Defenders",
+      grepl("^GK", Pos) ~ "Goalkeepers",
+      TRUE ~ "Other"
+    ),
+    pos_label = factor(pos_label, levels = c("Forwards", "Midfielders", "Defenders", "Goalkeepers"))
+  )
+
+n_story <- nrow(qualified_players)
+```
+
+## Aggregate Performance Across Age Groups
+
+At first glance, an unstratified comparison suggests that overall goal contribution rates remain fairly flat across early adulthood before tapering in older age brackets.
+
+```{r}
+#| label: fig-overall-age-groups
+#| fig-cap: "Distribution of goal contributions per 90 across career age brackets. White diamonds mark the group means."
+#| warning: false
+#| message: false
+#| echo: false
+#| fig-width: 8
+#| fig-height: 4.5
+
+ggplot(qualified_players, aes(x = age_group, y = ga_per_90, fill = age_group)) +
+  geom_boxplot(outlier.alpha = 0.25, outlier.size = 1.3, show.legend = FALSE) +
+  stat_summary(fun = mean, geom = "point", shape = 23, size = 3, fill = "white", color = "#1d3557") +
+  scale_fill_brewer(palette = "Blues") +
+  coord_cartesian(ylim = c(0, 1.25)) +
+  labs(
+    title = "Goal Contributions per 90 by Age Group (Overall)",
+    subtitle = paste0("N = ", format(n_story, big.mark = ","), " players with at least 450 minutes played"),
+    x = "Age Bracket",
+    y = "Goal Contributions per 90 (Gls + Ast / 90s)",
+    caption = "Data: 2025–2026 European Top 5 Leagues. Boxplots show quartiles; diamonds indicate group means."
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    panel.grid.minor = element_blank()
+  )
+```
+
+Across all positions combined, the mean goal contribution rate is 0.25 per 90 for players aged 17–20 ($n = 204$), 0.22 for ages 21–24 ($n = 644$) and 25–28 ($n = 678$), 0.21 for ages 29–32 ($n = 339$), and 0.17 for players 33 and older ($n = 134$).
+
+## Accounting for Tactical Position
+
+Looking strictly at overall numbers hides a substantial confounding variable: **playing position**. Different positions have fundamentally different tactical duties and age curves.
+
+```{r}
+#| label: fig-position-age-groups
+#| fig-cap: "Mean goal contributions per 90 broken down by player position and age bracket."
+#| warning: false
+#| message: false
+#| echo: false
+#| fig-width: 9
+#| fig-height: 5.5
+
+ggplot(qualified_players, aes(x = age_group, y = ga_per_90, fill = pos_label)) +
+  stat_summary(fun = mean, geom = "col", alpha = 0.85, show.legend = FALSE) +
+  stat_summary(
+    aes(label = sprintf("%.2f", after_stat(y))),
+    fun = mean,
+    geom = "text",
+    vjust = -0.4,
+    size = 3.2
+  ) +
+  facet_wrap(~pos_label, scales = "free_y") +
+  scale_fill_manual(values = c(
+    "Forwards" = "#e63946",
+    "Midfielders" = "#457b9d",
+    "Defenders" = "#2a9d8f",
+    "Goalkeepers" = "#6c757d"
+  )) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.18))) +
+  labs(
+    title = "Mean Goal Contributions per 90 by Position and Age Group",
+    subtitle = "Forwards peak in the 29–32 age group; goalkeepers and defenders show little offensive variation.",
+    x = "Age Bracket",
+    y = "Mean G+A per 90",
+    caption = "Data: 2025–2026 season (Min >= 450). Labels show exact mean goal contributions per 90."
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    strip.text = element_text(face = "bold", size = 12),
+    panel.grid.minor = element_blank()
+  )
+```
+
+### Analysis & Key Findings
+
+When we disaggregate by position, the true offensive trajectory becomes clear. For forwards, who carry primary responsibility for goal creation, productivity actually peaks in the **29–32 age bracket** with an average of **0.53 goal contributions per 90 minutes**, compared to 0.49 for ages 25–28, 0.40 for ages 21–24, and 0.48 for veteran forwards aged 33+. Midfielders remain remarkably consistent throughout their twenties and thirties (averaging between 0.23 and 0.28 G+A per 90), while defenders (0.08–0.10) and goalkeepers (near zero) have low goal involvement regardless of age.
+
+The apparent decline in the aggregate graph is largely an artifact of **positional composition**. Goalkeepers make up 19.4% of all qualifying players aged 33+, but represent under 2% of players aged 17–20. Because goalkeepers and central defenders have longer careers than outfield sprinters, older age brackets naturally contain a much higher proportion of defensive players who rarely score, depressing the overall group average.
+
+### Limitations & Causal Considerations
+
+It is essential not to interpret these empirical patterns as proof that age directly causes changes in soccer performance:
+
+1. **Selection & Survivor Bias:** Older players who continue earning regular playing time (450+ minutes) in Europe's top five leagues are elite survivors. We only observe the veterans good enough to stay in top leagues, not those whose performance declined and transferred to lower divisions.
+2. **Measurement Limitations:** Goals and assists measure direct offensive end-product, but soccer performance involves press resistance, positioning, defensive recoveries, and stamina—attributes that may peak at different ages.
+3. **Single-Season Cross-Section:** These data represent a single season snapshot (2025–2026) rather than a longitudinal cohort tracking individual athletes over their entire careers.
+
+### Data Source
+Data was retrieved from Kaggle: [Football Players Statistics (2025–2026)](https://www.kaggle.com/datasets/hubertsidorowicz/football-players-stats-2025-2026) by Hubert Sidorowicz, sourced from FBref.
+

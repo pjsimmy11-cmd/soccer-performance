@@ -1,0 +1,82 @@
+---
+title: "Explore the Data: Interactive Player Explorer"
+---
+
+## Interactive Player Explorer
+
+Use the interactive visualization below to investigate how individual player performance varies with age across Europe's top five domestic soccer leagues during the 2025–2026 season.
+
+### How to Use This Graphic
+* **Filter by League & Position:** Use the dropdown filters below to narrow the players shown. You can choose one or more leagues and positions, or leave them empty to view all players.
+* **Hover for Details:** Move your cursor over any marker to see the player's name, age, squad, league, position, minutes played, goals, assists, and goal contributions per 90.
+* **Zoom & Pan:** Click and drag on any region of the plot to zoom in. Use the top-right Plotly toolbar to pan, or double-click anywhere on the plot area to reset the zoom.
+
+```{r}
+#| label: setup-explore
+#| echo: false
+#| message: false
+#| warning: false
+
+library(readr)
+library(dplyr)
+library(plotly)
+library(crosstalk)
+
+players_clean <- read_csv("data/players_data_light-2025_2026.csv", show_col_types = FALSE) |>
+  filter(!is.na(Age), !is.na(Gls), !is.na(Ast), !is.na(`90s`), `90s` > 0) |>
+  mutate(
+    ga_per_90 = round((Gls + Ast) / `90s`, 2),
+    League = sub("^[a-z]{2} ", "", Comp)
+  )
+
+sd <- SharedData$new(players_clean)
+
+p <- plot_ly(
+  sd,
+  x = ~Age,
+  y = ~ga_per_90,
+  type = "scatter",
+  mode = "markers",
+  marker = list(
+    size = 7,
+    opacity = 0.55,
+    color = "#1d3557"
+  ),
+  text = ~paste0(
+    "<b>", Player, "</b>",
+    "<br>Age: ", Age,
+    "<br>Squad: ", Squad,
+    "<br>League: ", League,
+    "<br>Position: ", Pos,
+    "<br>Minutes: ", format(Min, big.mark = ","),
+    "<br>Goals: ", Gls,
+    "<br>Assists: ", Ast,
+    "<br>Goal Contributions / 90: ", ga_per_90
+  ),
+  hoverinfo = "text"
+) |>
+  layout(
+    xaxis = list(
+      title = "Age (Years)",
+      dtick = 2
+    ),
+    yaxis = list(
+      title = "Goal Contributions per 90 (Gls + Ast / 90s)",
+      range = c(-0.1, 3.5)
+    ),
+    hovermode = "closest"
+  )
+
+bscols(
+  widths = c(3, 9),
+  list(
+    filter_select("filter_league", "Filter by League:", sd, ~League),
+    filter_select("filter_pos", "Filter by Position:", sd, ~Pos)
+  ),
+  p
+)
+```
+
+### Data Source
+Data was retrieved from Kaggle: [Football Players Statistics (2025–2026)](https://www.kaggle.com/datasets/hubertsidorowicz/football-players-stats-2025-2026) by Hubert Sidorowicz, sourced from FBref.
+

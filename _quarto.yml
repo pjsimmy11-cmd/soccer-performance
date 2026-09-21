@@ -1,0 +1,20 @@
+project:
+  type: website
+  output-dir: docs
+
+website:
+  title: "Age and Soccer Player Performance"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - href: explore.qmd
+        text: Explore the Data
+      - href: story.qmd
+        text: Age and Performance
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true
