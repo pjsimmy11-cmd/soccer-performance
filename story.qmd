@@ -1,5 +1,6 @@
 ---
 title: "When Does Performance Peak?"
+subtitle: "AGE CURVES / POSITIONAL CONTEXT"
 ---
 
 ## Investigating Peak Age in European Soccer
@@ -63,7 +64,13 @@ At first glance, an unstratified comparison suggests that overall goal contribut
 ggplot(qualified_players, aes(x = age_group, y = ga_per_90, fill = age_group)) +
   geom_boxplot(outlier.alpha = 0.25, outlier.size = 1.3, show.legend = FALSE) +
   stat_summary(fun = mean, geom = "point", shape = 23, size = 3, fill = "white", color = "#1d3557") +
-  scale_fill_brewer(palette = "Blues") +
+  scale_fill_manual(values = c(
+    "17–20" = "#d8ee70",
+    "21–24" = "#b3cb76",
+    "25–28" = "#6f995b",
+    "29–32" = "#315d40",
+    "33+" = "#cf5a3d"
+  )) +
   coord_cartesian(ylim = c(0, 1.25)) +
   labs(
     title = "Goal Contributions per 90 by Age Group (Overall)",
@@ -105,9 +112,9 @@ ggplot(qualified_players, aes(x = age_group, y = ga_per_90, fill = pos_label)) +
   ) +
   facet_wrap(~pos_label, scales = "free_y") +
   scale_fill_manual(values = c(
-    "Forwards" = "#e63946",
-    "Midfielders" = "#457b9d",
-    "Defenders" = "#2a9d8f",
+    "Forwards" = "#cf5a3d",
+    "Midfielders" = "#17422f",
+    "Defenders" = "#86a96e",
     "Goalkeepers" = "#6c757d"
   )) +
   scale_y_continuous(expand = expansion(mult = c(0, 0.18))) +

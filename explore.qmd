@@ -1,5 +1,6 @@
 ---
 title: "Explore the Data: Interactive Player Explorer"
+subtitle: "PLAYER-LEVEL DATA / LEAGUE + POSITION FILTERS"
 ---
 
 ## Interactive Player Explorer
@@ -40,7 +41,7 @@ p <- plot_ly(
   marker = list(
     size = 7,
     opacity = 0.55,
-    color = "#1d3557"
+    color = "#17422f"
   ),
   text = ~paste0(
     "<b>", Player, "</b>",

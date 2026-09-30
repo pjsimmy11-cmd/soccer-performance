@@ -1,0 +1,191 @@
+---
+title: "RISING STARS"
+subtitle: "Young players performing ahead of the curve."
+format:
+  html:
+    toc: false
+---
+
+::: {.rising-stars-page}
+
+## Players to Watch
+
+Under-22 players are ranked by goal contributions per 90 against players of the same age. All featured players logged at least 450 minutes; each percentile includes its eligible peer-group size.
+
+```{r}
+#| label: setup-rising-stars
+#| echo: false
+#| message: false
+#| warning: false
+
+library(readr)
+library(dplyr)
+library(plotly)
+library(crosstalk)
+
+players_raw <- read_csv("data/players_data_light-2025_2026.csv", show_col_types = FALSE)
+
+young_players <- players_raw |>
+  filter(
+    !is.na(Age), Age >= 17, Age <= 21,
+    !is.na(Min), Min >= 450,
+    !is.na(Gls), !is.na(Ast), !is.na(`90s`), `90s` > 0
+  ) |>
+  mutate(
+    League = sub("^[a-z]{2,3} ", "", Comp),
+    PositionGroup = case_when(
+      grepl("^FW", Pos) ~ "Forwards",
+      grepl("^MF", Pos) ~ "Midfielders",
+      grepl("^DF", Pos) ~ "Defenders",
+      grepl("^GK", Pos) ~ "Goalkeepers",
+      TRUE ~ "Other"
+    ),
+    ga_per_90 = (Gls + Ast) / `90s`
+  ) |>
+  group_by(Age) |>
+  mutate(
+    age_peer_n = n(),
+    age_percentile = percent_rank(ga_per_90)
+  ) |>
+  ungroup()
+
+featured_players <- young_players |>
+  arrange(desc(age_percentile), desc(ga_per_90), desc(Min)) |>
+  slice_head(n = 3)
+
+young_players <- young_players |>
+  mutate(is_featured = Player %in% featured_players$Player)
+```
+
+```{r}
+#| label: rising-star-cards
+#| echo: false
+#| message: false
+
+watch_cards <- lapply(seq_len(nrow(featured_players)), \(rank) {
+  player <- featured_players[rank, ]
+
+  htmltools::tags$article(
+    class = "watch-card",
+    htmltools::tags$div(
+      class = "watch-card__topline",
+      htmltools::tags$span(sprintf("WATCH / %02d", rank), class = "watch-card__rank"),
+      htmltools::tags$span(paste("AGE", player$Age[[1]]), class = "watch-card__age")
+    ),
+    htmltools::tags$h3(player$Player[[1]], class = "watch-card__name"),
+    htmltools::tags$div(
+      class = "watch-card__clubs",
+      htmltools::tags$span(player$Squad[[1]], class = "watch-card__club"),
+      htmltools::tags$span(player$League[[1]], class = "watch-card__league")
+    ),
+    htmltools::tags$div(
+      class = "watch-card__rate",
+      htmltools::tags$span("GOAL CONTRIBUTIONS / 90"),
+      htmltools::tags$strong(sprintf("%.2f", player$ga_per_90[[1]]))
+    ),
+    htmltools::tags$div(
+      class = "watch-card__facts",
+      htmltools::tags$div(
+        class = "watch-card__fact",
+        htmltools::tags$span("MINUTES"),
+        htmltools::tags$strong(format(player$Min[[1]], big.mark = ",", scientific = FALSE, trim = TRUE))
+      ),
+      htmltools::tags$div(
+        class = "watch-card__fact",
+        htmltools::tags$span("GOALS"),
+        htmltools::tags$strong(player$Gls[[1]])
+      ),
+      htmltools::tags$div(
+        class = "watch-card__fact",
+        htmltools::tags$span("ASSISTS"),
+        htmltools::tags$strong(player$Ast[[1]])
+      )
+    ),
+    htmltools::tags$div(
+      class = "watch-card__benchmark",
+      htmltools::tags$strong(paste0(round(player$age_percentile[[1]] * 100), "th")),
+      htmltools::tags$span("PERCENTILE VS SAME-AGE PEERS"),
+      htmltools::tags$small(paste("among", player$age_peer_n[[1]], "eligible", player$Age[[1]], "year-olds"))
+    )
+  )
+})
+
+htmltools::tagList(watch_cards)
+```
+
+## Age-Adjusted Output
+
+Filter the eligible U22 players by league and position. Marker color shows percentile within each player's age group; star markers identify the featured three.
+
+```{r}
+#| label: rising-stars-interactive-plot
+#| echo: false
+#| message: false
+#| warning: false
+
+players_shared <- SharedData$new(
+  young_players,
+  key = ~paste(Player, Squad, Age),
+  group = "rising-stars"
+)
+
+performance_plot <- plot_ly(
+  players_shared,
+  x = ~Age,
+  y = ~ga_per_90,
+  type = "scatter",
+  mode = "markers",
+  marker = list(
+    size = ~ifelse(is_featured, 14, 8),
+    symbol = ~ifelse(is_featured, "star", "circle"),
+    color = ~age_percentile,
+    colorscale = list(c(0, "#d8ee70"), c(0.55, "#6f995b"), c(1, "#10291f")),
+    cmin = 0,
+    cmax = 1,
+    line = list(color = "#ffffff", width = 1),
+    colorbar = list(title = "Age-peer<br>percentile", tickformat = ".0%")
+  ),
+  text = ~paste0(
+    "<b>", Player, "</b>",
+    "<br>Age: ", Age,
+    "<br>Club: ", Squad,
+    "<br>League: ", League,
+    "<br>Position: ", PositionGroup,
+    "<br>Minutes: ", format(Min, big.mark = ","),
+    "<br>Goals: ", Gls,
+    "<br>Assists: ", Ast,
+    "<br>G+A per 90: ", round(ga_per_90, 2),
+    "<br>Same-age percentile: ", round(age_percentile * 100),
+    "<br>Eligible same-age peers: ", age_peer_n
+  ),
+  hoverinfo = "text"
+) |>
+  layout(
+    xaxis = list(title = "Age (years)", dtick = 1, range = c(16.5, 21.5)),
+    yaxis = list(title = "Goal contributions per 90", rangemode = "tozero"),
+    hovermode = "closest",
+    showlegend = FALSE,
+    plot_bgcolor = "#f4f6f1",
+    paper_bgcolor = "#f4f6f1",
+    margin = list(l = 65, r = 20, b = 55, t = 24)
+  )
+
+bscols(
+  widths = c(3, 9),
+  list(
+    filter_select("rising_league_filter", "League", players_shared, ~League),
+    filter_select("rising_position_filter", "Position", players_shared, ~PositionGroup)
+  ),
+  performance_plot
+)
+```
+
+### Ranking Method
+
+The eligible comparison group includes players aged 17–21 with at least 450 minutes in the five leagues. Percentiles compare goal contributions per 90 among players of the same integer age. The age-16 cohort is omitted because only three players meet the minutes threshold, too few for a useful comparison.
+
+### Data Source
+
+Data: [Football Players Statistics (2025–2026)](https://www.kaggle.com/datasets/hubertsidorowicz/football-players-stats-2025-2026), by Hubert Sidorowicz, sourced from FBref.
+
+:::

@@ -3,11 +3,13 @@ project:
   output-dir: docs
 
 website:
-  title: "Age and Soccer Player Performance"
+  title: "TOUCHLINE / DATA"
   navbar:
     left:
       - href: index.qmd
         text: Home
+      - href: rising-stars.qmd
+        text: Rising Stars
       - href: explore.qmd
         text: Explore the Data
       - href: story.qmd

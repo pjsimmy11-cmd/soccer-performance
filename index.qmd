@@ -1,16 +1,29 @@
 ---
 title: "How Does Age Affect Soccer Player Performance?"
+subtitle: "2025-26 / EUROPEAN TOP FIVE"
 ---
 
 ## Project Overview
 
-In professional soccer, understanding how an athlete's age relates to on-field production is vital for roster construction, tactical planning, and player valuation. This project examines the relationship between player age and offensive output across Europe's top five domestic leagues (Premier League, La Liga, Serie A, Bundesliga, and Ligue 1) during the 2025–2026 season.
+:::: {.overview-grid}
 
-Our primary performance metric is **goal contributions per 90 minutes**, calculated as:
+::: {.overview-copy}
+In professional soccer, age and output shape recruitment, squad planning, and player valuation. This report tracks attacking production across the Premier League, La Liga, Serie A, Bundesliga, and Ligue 1 during the 2025-2026 season.
 
-$$\text{Goal Contributions per 90} = \frac{\text{Goals} + \text{Assists}}{\text{90s Played}}$$
+We compare players using **goal contributions per 90 minutes**, which adjusts goals and assists for playing time.
+:::
 
-Normalizing per 90 minutes allows us to compare players who logged different total amounts of playing time across the season.
+::: {.metric-panel}
+<div class="metric-label">RATE MODEL / PER 90</div>
+
+$$
+	ext{Goal Contributions per 90} = \frac{\text{Goals} + \text{Assists}}{\text{90s Played}}
+$$
+
+<div class="metric-note">GOALS + ASSISTS / 90 MINUTES PLAYED</div>
+:::
+
+::::
 
 ```{r}
 #| label: setup-homepage
@@ -30,6 +43,17 @@ players <- players_raw |>
   mutate(ga_per_90 = (Gls + Ast) / `90s`)
 
 n_obs <- nrow(players)
+
+veteran_standouts <- players_raw |>
+  filter(!is.na(Age), Age >= 33, !is.na(Min), Min >= 450,
+         !is.na(Gls), !is.na(Ast), !is.na(`90s`), `90s` > 0) |>
+  mutate(
+    League = sub("^[a-z]{2} ", "", Comp),
+    ga_per_90 = (Gls + Ast) / `90s`
+  ) |>
+  arrange(desc(ga_per_90)) |>
+  select(Player, Age, Squad, League, Min, Gls, Ast, ga_per_90) |>
+  slice_head(n = 10)
 ```
 
 ## Age vs. Goal Contributions
@@ -54,9 +78,9 @@ p <- ggplot(players, aes(x = Age, y = ga_per_90)) +
       "<br>League: ", sub("^[a-z]{2} ", "", Comp),
       "<br>G+A per 90: ", round(ga_per_90, 2)
     )),
-    alpha = 0.3, color = "#1d3557", size = 1.8
+    alpha = 0.3, color = "#17422f", size = 1.8
   ) +
-  geom_smooth(method = "loess", color = "#e63946", se = TRUE, linewidth = 1.2) +
+  geom_smooth(method = "loess", color = "#cf5a3d", se = TRUE, linewidth = 1.2) +
   coord_cartesian(ylim = c(0, 2.5)) +
   scale_x_continuous(breaks = seq(15, 45, by = 5)) +
   labs(
@@ -79,9 +103,25 @@ gp
 
 ### Interpreting the Pattern
 
-The scatterplot above displays all `r format(n_obs, big.mark = ",")` player records from the 2025–2026 season. The LOESS smoothing curve indicates a modest peak in average goal contributions in the mid-to-late twenties, followed by a slight decline into the thirties. 
+The scatterplot above displays all `r format(n_obs, big.mark = ",")` player records from the 2025–2026 season. The LOESS smoothing curve indicates a modest peak in average goal contributions in the mid-to-late twenties, followed by a slight decline into the thirties.
 
 **Important note on correlation vs. causation:** This graphic shows an observational association, not a causal relationship. Age itself does not determine a player's goal contribution rate. Factors such as tactical position, team strength, survivor bias (only elite older players remain in top leagues), and role specialization heavily influence these numbers.
+
+## Veteran Standouts
+
+These are the 10 players aged 33 or older with the highest goal contributions per 90, among players who logged at least 450 minutes. The ranking highlights productive veterans across Europe's top five leagues; it does not imply that older players outperform younger players overall.
+
+```{r}
+#| label: tbl-veteran-standouts
+#| echo: false
+
+knitr::kable(
+  veteran_standouts,
+  col.names = c("Player", "Age", "Club", "League", "Minutes", "Goals", "Assists", "G+A per 90"),
+  digits = 2,
+  caption = "Top veteran performers in the 2025-2026 season (minimum 450 minutes)."
+)
+```
 
 ### Data Source
 Data was retrieved from Kaggle: [Football Players Statistics (2025–2026)](https://www.kaggle.com/datasets/hubertsidorowicz/football-players-stats-2025-2026) by Hubert Sidorowicz, sourced from FBref.

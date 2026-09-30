@@ -4,21 +4,49 @@
     "href": "index.html",
     "title": "How Does Age Affect Soccer Player Performance?",
     "section": "",
-    "text": "In professional soccer, understanding how an athlete’s age relates to on-field production is vital for roster construction, tactical planning, and player valuation. This project examines the relationship between player age and offensive output across Europe’s top five domestic leagues (Premier League, La Liga, Serie A, Bundesliga, and Ligue 1) during the 2025–2026 season.\nOur primary performance metric is goal contributions per 90 minutes, calculated as:\n\\[\\text{Goal Contributions per 90} = \\frac{\\text{Goals} + \\text{Assists}}{\\text{90s Played}}\\]\nNormalizing per 90 minutes allows us to compare players who logged different total amounts of playing time across the season."
+    "text": "In professional soccer, age and output shape recruitment, squad planning, and player valuation. This report tracks attacking production across the Premier League, La Liga, Serie A, Bundesliga, and Ligue 1 during the 2025-2026 season.\nWe compare players using goal contributions per 90 minutes, which adjusts goals and assists for playing time.\n\n\n\nRATE MODEL / PER 90\n\n\\[\n    ext{Goal Contributions per 90} = \\frac{\\text{Goals} + \\text{Assists}}{\\text{90s Played}}\n\\]\n\nGOALS + ASSISTS / 90 MINUTES PLAYED"
   },
   {
     "objectID": "index.html#project-overview",
     "href": "index.html#project-overview",
     "title": "How Does Age Affect Soccer Player Performance?",
     "section": "",
-    "text": "In professional soccer, understanding how an athlete’s age relates to on-field production is vital for roster construction, tactical planning, and player valuation. This project examines the relationship between player age and offensive output across Europe’s top five domestic leagues (Premier League, La Liga, Serie A, Bundesliga, and Ligue 1) during the 2025–2026 season.\nOur primary performance metric is goal contributions per 90 minutes, calculated as:\n\\[\\text{Goal Contributions per 90} = \\frac{\\text{Goals} + \\text{Assists}}{\\text{90s Played}}\\]\nNormalizing per 90 minutes allows us to compare players who logged different total amounts of playing time across the season."
+    "text": "In professional soccer, age and output shape recruitment, squad planning, and player valuation. This report tracks attacking production across the Premier League, La Liga, Serie A, Bundesliga, and Ligue 1 during the 2025-2026 season.\nWe compare players using goal contributions per 90 minutes, which adjusts goals and assists for playing time.\n\n\n\nRATE MODEL / PER 90\n\n\\[\n    ext{Goal Contributions per 90} = \\frac{\\text{Goals} + \\text{Assists}}{\\text{90s Played}}\n\\]\n\nGOALS + ASSISTS / 90 MINUTES PLAYED"
   },
   {
     "objectID": "index.html#age-vs.-goal-contributions",
     "href": "index.html#age-vs.-goal-contributions",
     "title": "How Does Age Affect Soccer Player Performance?",
     "section": "Age vs. Goal Contributions",
-    "text": "Age vs. Goal Contributions\nTotal observations analyzed: 2,783 players.\n\n\n\n\n\n\n\n\nFigure 1: Scatterplot of player age versus goal contributions per 90 minutes across Europe’s top five leagues, with a LOESS smooth trend line.\n\n\n\n\n\nInterpreting the Pattern\nThe scatterplot above displays all 2,783 player records from the 2025–2026 season. The LOESS smoothing curve indicates a modest peak in average goal contributions in the mid-to-late twenties, followed by a slight decline into the thirties.\nImportant note on correlation vs. causation: This graphic shows an observational association, not a causal relationship. Age itself does not determine a player’s goal contribution rate. Factors such as tactical position, team strength, survivor bias (only elite older players remain in top leagues), and role specialization heavily influence these numbers.\n\n\nData Source\nData was retrieved from Kaggle: Football Players Statistics (2025–2026) by Hubert Sidorowicz, sourced from FBref."
+    "text": "Age vs. Goal Contributions\nTotal observations analyzed: 2,783 players.\n\n\n\n\n\n\n\n\nFigure 1: Scatterplot of player age versus goal contributions per 90 minutes across Europe’s top five leagues, with a LOESS smooth trend line.\n\n\n\n\n\nInterpreting the Pattern\nThe scatterplot above displays all 2,783 player records from the 2025–2026 season. The LOESS smoothing curve indicates a modest peak in average goal contributions in the mid-to-late twenties, followed by a slight decline into the thirties.\nImportant note on correlation vs. causation: This graphic shows an observational association, not a causal relationship. Age itself does not determine a player’s goal contribution rate. Factors such as tactical position, team strength, survivor bias (only elite older players remain in top leagues), and role specialization heavily influence these numbers."
+  },
+  {
+    "objectID": "index.html#veteran-standouts",
+    "href": "index.html#veteran-standouts",
+    "title": "How Does Age Affect Soccer Player Performance?",
+    "section": "Veteran Standouts",
+    "text": "Veteran Standouts\nThese are the 10 players aged 33 or older with the highest goal contributions per 90, among players who logged at least 450 minutes. The ranking highlights productive veterans across Europe’s top five leagues; it does not imply that older players outperform younger players overall.\n\n\n\n\nTable 1: Top veteran performers in the 2025-2026 season (minimum 450 minutes).\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nPlayer\nAge\nClub\nLeague\nMinutes\nGoals\nAssists\nG+A per 90\n\n\n\n\nRobert Lewandowski\n36\nBarcelona\nLa Liga\n1664\n14\n2\n0.86\n\n\nAndrej Kramarić\n34\nHoffenheim\nBundesliga\n2207\n14\n6\n0.82\n\n\nGerard Moreno\n33\nVillarreal\nLa Liga\n1343\n10\n0\n0.67\n\n\nAntoine Griezmann\n34\nAtlético Madrid\nLa Liga\n1481\n7\n4\n0.67\n\n\nPierre-Emerick Aubameyang\n36\nMarseille\nLigue 1\n2039\n10\n5\n0.66\n\n\nPedro\n38\nLazio\nSerie A\n982\n5\n2\n0.64\n\n\nCédric Bakambu\n34\nReal Betis\nLa Liga\n569\n3\n1\n0.63\n\n\nIago Aspas\n37\nCelta Vigo\nLa Liga\n1140\n5\n3\n0.63\n\n\nMohamed Salah\n33\nLiverpool\neng Premier League\n2146\n7\n7\n0.59\n\n\nCallum Wilson\n33\nWest Ham United\neng Premier League\n1251\n7\n1\n0.58\n\n\n\n\n\n\n\n\n\nData Source\nData was retrieved from Kaggle: Football Players Statistics (2025–2026) by Hubert Sidorowicz, sourced from FBref."
+  },
+  {
+    "objectID": "rising-stars.html",
+    "href": "rising-stars.html",
+    "title": "RISING STARS",
+    "section": "",
+    "text": "Under-22 players are ranked by goal contributions per 90 against players of the same age. All featured players logged at least 450 minutes; each percentile includes its eligible peer-group size.\n\n\n\n\nWATCH / 01\nAGE 18\n\n\n\nBarcelona\nLa Liga\n\n\nGOAL CONTRIBUTIONS / 90\n1.08\n\n\n\nMINUTES\n2,262\n\n\nGOALS\n16\n\n\nASSISTS\n11\n\n\n\n100th\nPERCENTILE VS SAME-AGE PEERS\namong 26 eligible 18 year-olds\n\n\n\n\nWATCH / 02\nAGE 20\n\n\n\nReal Sociedad\nLa Liga\n\n\nGOAL CONTRIBUTIONS / 90\n0.97\n\n\n\nMINUTES\n835\n\n\nGOALS\n9\n\n\nASSISTS\n0\n\n\n\n100th\nPERCENTILE VS SAME-AGE PEERS\namong 96 eligible 20 year-olds\n\n\n\n\nWATCH / 03\nAGE 19\n\n\n\nEintracht Frankfurt\nBundesliga\n\n\nGOAL CONTRIBUTIONS / 90\n0.94\n\n\n\nMINUTES\n1,156\n\n\nGOALS\n8\n\n\nASSISTS\n4\n\n\n\n100th\nPERCENTILE VS SAME-AGE PEERS\namong 58 eligible 19 year-olds\n\n\n\n\n\n\n\nFilter the eligible U22 players by league and position. Marker color shows percentile within each player’s age group; star markers identify the featured three.\n\n\n\n\n\n\nLeague\n\n\n\n\n\n\nPosition\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nThe eligible comparison group includes players aged 17–21 with at least 450 minutes in the five leagues. Percentiles compare goal contributions per 90 among players of the same integer age. The age-16 cohort is omitted because only three players meet the minutes threshold, too few for a useful comparison.\n\n\n\nData: Football Players Statistics (2025–2026), by Hubert Sidorowicz, sourced from FBref."
+  },
+  {
+    "objectID": "rising-stars.html#players-to-watch",
+    "href": "rising-stars.html#players-to-watch",
+    "title": "RISING STARS",
+    "section": "",
+    "text": "Under-22 players are ranked by goal contributions per 90 against players of the same age. All featured players logged at least 450 minutes; each percentile includes its eligible peer-group size.\n\n\n\n\nWATCH / 01\nAGE 18\n\n\n\nBarcelona\nLa Liga\n\n\nGOAL CONTRIBUTIONS / 90\n1.08\n\n\n\nMINUTES\n2,262\n\n\nGOALS\n16\n\n\nASSISTS\n11\n\n\n\n100th\nPERCENTILE VS SAME-AGE PEERS\namong 26 eligible 18 year-olds\n\n\n\n\nWATCH / 02\nAGE 20\n\n\n\nReal Sociedad\nLa Liga\n\n\nGOAL CONTRIBUTIONS / 90\n0.97\n\n\n\nMINUTES\n835\n\n\nGOALS\n9\n\n\nASSISTS\n0\n\n\n\n100th\nPERCENTILE VS SAME-AGE PEERS\namong 96 eligible 20 year-olds\n\n\n\n\nWATCH / 03\nAGE 19\n\n\n\nEintracht Frankfurt\nBundesliga\n\n\nGOAL CONTRIBUTIONS / 90\n0.94\n\n\n\nMINUTES\n1,156\n\n\nGOALS\n8\n\n\nASSISTS\n4\n\n\n\n100th\nPERCENTILE VS SAME-AGE PEERS\namong 58 eligible 19 year-olds"
+  },
+  {
+    "objectID": "rising-stars.html#age-adjusted-output",
+    "href": "rising-stars.html#age-adjusted-output",
+    "title": "RISING STARS",
+    "section": "",
+    "text": "Filter the eligible U22 players by league and position. Marker color shows percentile within each player’s age group; star markers identify the featured three.\n\n\n\n\n\n\nLeague\n\n\n\n\n\n\nPosition\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nThe eligible comparison group includes players aged 17–21 with at least 450 minutes in the five leagues. Percentiles compare goal contributions per 90 among players of the same integer age. The age-16 cohort is omitted because only three players meet the minutes threshold, too few for a useful comparison.\n\n\n\nData: Football Players Statistics (2025–2026), by Hubert Sidorowicz, sourced from FBref."
   },
   {
     "objectID": "story.html",
