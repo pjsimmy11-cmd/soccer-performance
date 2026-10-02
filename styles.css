@@ -49,22 +49,9 @@ body:has(.home-hero) #title-block-header {
   min-height: 32rem;
   background:
     linear-gradient(90deg, rgba(14, 28, 42, 0.48), rgba(14, 28, 42, 0.22)),
-    url("https://img.youtube.com/vi/4z-s3zRku20/maxresdefault.jpg") center/cover no-repeat;
-}
-
-.home-hero__video {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  border: 0;
-  object-fit: cover;
-  opacity: 0;
-  transition: opacity 300ms ease;
-}
-
-.home-hero--playing .home-hero__video {
-  opacity: 1;
+    linear-gradient(90deg, transparent calc(50% - 0.5px), rgb(255 255 255 / 16%) 50%, transparent calc(50% + 0.5px)),
+    radial-gradient(circle at 50% 50%, transparent 0 6.5rem, rgb(255 255 255 / 16%) 6.55rem 6.6rem, transparent 6.65rem),
+    linear-gradient(135deg, #10231d, #26744f);
 }
 
 .home-hero__button[hidden] {
@@ -358,6 +345,170 @@ body:has(.home-hero) #title-block-header {
   text-transform: uppercase;
 }
 
+main.content:has(.story-page) #title-block-header {
+  box-sizing: border-box;
+  width: 100vw;
+  margin-bottom: 1.75rem;
+  padding: 2.5rem max(1.25rem, calc((100vw - 1120px) / 2)) 2.2rem;
+}
+
+main.content:has(.story-page) #title-block-header .title {
+  max-width: 22ch;
+  font-size: 4rem;
+}
+
+main.content:has(.story-page) #title-block-header .subtitle {
+  max-width: 58rem;
+  color: rgb(255 255 255 / 82%);
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.5;
+  text-transform: none;
+}
+
+.story-page {
+  max-width: 74rem;
+  margin-inline: auto;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+  margin: 1.35rem 0 1.1rem;
+}
+
+.summary-card {
+  display: grid;
+  align-content: start;
+  gap: 0.25rem;
+  min-width: 0;
+  border-top: 3px solid var(--signal);
+  padding: 0.9rem 1rem 1rem;
+  background: var(--white);
+  box-shadow: 0 3px 14px rgb(17 37 27 / 6%);
+}
+
+.summary-card > p {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0;
+}
+
+.summary-label,
+.summary-note {
+  color: var(--muted);
+  font-size: 0.73rem;
+  font-weight: 700;
+}
+
+.summary-label {
+  text-transform: uppercase;
+}
+
+.summary-card strong {
+  color: var(--heading);
+  font-family: "Barlow Condensed", Impact, sans-serif;
+  font-size: 2rem;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.summary-note {
+  font-weight: 500;
+}
+
+.methodology {
+  margin: 0.9rem 0 2rem;
+  border-block: 1px solid var(--line);
+  padding: 0.75rem 0;
+}
+
+.methodology summary {
+  color: var(--pitch-deep);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.methodology p {
+  margin: 0.75rem 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.story-page .chart-card {
+  margin: 1rem 0 2rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: clamp(1rem, 2.5vw, 1.6rem);
+  background: var(--white);
+  box-shadow: 0 8px 24px rgb(17 37 27 / 6%);
+}
+
+.story-page .chart-card h3 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.story-page .chart-card > p:not(.chart-caption) {
+  margin: 0.4rem 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.story-page .chart-caption {
+  margin: 0.65rem 0 0;
+  border-top: 1px solid var(--line);
+  padding-top: 0.65rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.position-control {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+  margin: 1rem 0 -0.5rem;
+}
+
+.position-control > p {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin: 0;
+}
+
+.position-control label {
+  color: var(--heading);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.position-control select {
+  min-height: 2.7rem;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.5rem 2.2rem 0.5rem 0.75rem;
+  background: var(--white);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+}
+
+.position-view > p {
+  max-width: none;
+  margin: 0 0 0.5rem;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.position-chart-content .plotly,
+.chart-card .plotly {
+  width: 100% !important;
+}
+
 h1,
 h2,
 h3 {
@@ -519,6 +670,32 @@ table tbody tr:hover {
   font-weight: 600;
 }
 
+.player-table-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: -0.5rem 0 1.5rem;
+  border-top: 1px solid var(--line);
+  padding: 0.8rem 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.player-table-pagination[hidden] {
+  display: none;
+}
+
+.player-table-page-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.player-table-page-actions button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .player-table-empty {
   display: grid;
   place-items: center;
@@ -532,6 +709,10 @@ table tbody tr:hover {
   text-align: center;
 }
 
+.player-table-empty[hidden] {
+  display: none;
+}
+
 .player-table-empty p {
   margin: 0;
   font-weight: 600;
@@ -542,7 +723,7 @@ table tbody tr:hover {
   margin-bottom: 1.5rem;
 }
 
-#player-goal-contributions-table_wrapper.table-empty {
+#player-goal-contributions-table.table-empty {
   display: none;
 }
 
@@ -608,6 +789,11 @@ table tbody tr:hover {
 
   .player-table-summary {
     justify-content: flex-start;
+  }
+
+  .player-table-pagination {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
 
@@ -744,6 +930,10 @@ table caption {
     padding-block: 2rem 1.8rem;
   }
 
+  main.content:has(.story-page) #title-block-header {
+    padding-block: 2rem 1.8rem;
+  }
+
   #title-block-header::after {
     right: -8rem;
     width: 15rem;
@@ -752,6 +942,14 @@ table caption {
 
   #title-block-header .title {
     font-size: 2.35rem;
+  }
+
+  main.content:has(.story-page) #title-block-header .title {
+    font-size: 2.45rem;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr;
   }
 
   main.content h2 {
@@ -782,18 +980,10 @@ table caption {
     animation: none;
   }
 
-  .home-hero__video,
   .veteran-spotlight__video {
     display: none;
   }
 
-  .home-hero__media {
-    background-image:
-      linear-gradient(135deg, rgba(11, 24, 35, 0.72), rgba(16, 40, 60, 0.76)),
-      url("https://img.youtube.com/vi/4z-s3zRku20/maxresdefault.jpg");
-  }
-
-  #home-hero-toggle,
   #veteran-video-toggle {
     display: none;
   }
