@@ -40,8 +40,9 @@ p <- plot_ly(
   mode = "markers",
   marker = list(
     size = 7,
-    opacity = 0.55,
-    color = "#17422f"
+    opacity = 0.62,
+    color = "#26744f",
+    line = list(color = "#ffffff", width = 0.6)
   ),
   text = ~paste0(
     "<b>", Player, "</b>",
@@ -59,13 +60,27 @@ p <- plot_ly(
   layout(
     xaxis = list(
       title = "Age (Years)",
-      dtick = 2
+      dtick = 2,
+      gridcolor = "#d5dfd7",
+      zerolinecolor = "#a9b8ad",
+      tickfont = list(color = "#586b61")
     ),
     yaxis = list(
       title = "Goal Contributions per 90 (Gls + Ast / 90s)",
-      range = c(-0.1, 3.5)
+      range = c(-0.1, 3.5),
+      gridcolor = "#d5dfd7",
+      zerolinecolor = "#a9b8ad",
+      tickfont = list(color = "#586b61")
     ),
-    hovermode = "closest"
+    hovermode = "closest",
+    plot_bgcolor = "#f2f5ef",
+    paper_bgcolor = "#f2f5ef",
+    font = list(family = "DM Sans, sans-serif", color = "#17251f", size = 12),
+    hoverlabel = list(
+      bgcolor = "#10231d",
+      bordercolor = "#c8f542",
+      font = list(color = "#ffffff", family = "DM Sans, sans-serif")
+    )
   )
 
 bscols(

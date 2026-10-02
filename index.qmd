@@ -1,7 +1,117 @@
 ---
-title: "How Does Age Affect Soccer Player Performance?"
-subtitle: "2025-26 / EUROPEAN TOP FIVE"
+toc: false
+page-layout: full
 ---
+
+```{=html}
+<div class="home-hero">
+  <div class="home-hero__media" aria-hidden="true"></div>
+  <div class="home-hero__overlay"></div>
+  <div class="home-hero__content">
+    <p class="home-hero__eyebrow">Age, performance, and attacking output</p>
+    <h1>How Does Age Affect Soccer Player Performance?</h1>
+    <p class="home-hero__intro">Across Europe's top leagues, we compare the age curve of attacking production to show how experience, role, and survival bias shape the numbers behind elite players.</p>
+    <div class="home-hero__actions">
+      <a class="home-hero__button home-hero__button--primary" href="#age-vs-goal-contributions">Explore the Data</a>
+    </div>
+  </div>
+</div>
+```
+
+```{r}
+#| label: setup-homepage
+#| message: false
+#| warning: false
+#| echo: false
+
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(DT)
+library(htmltools)
+library(stringr)
+
+players_raw <- read_csv("data/players_data_light-2025_2026.csv", show_col_types = FALSE)
+
+players <- players_raw |>
+  filter(!is.na(Age), !is.na(Gls), !is.na(Ast), !is.na(`90s`), `90s` > 0) |>
+  mutate(ga_per_90 = (Gls + Ast) / `90s`)
+
+n_obs <- nrow(players)
+
+players_table <- players_raw |>
+  filter(!is.na(Age), !is.na(Gls), !is.na(Ast), !is.na(`90s`), `90s` > 0) |>
+  mutate(
+    League = str_replace(Comp, "^[a-z]{2} ", ""),
+    Position = str_replace_all(Pos, ",", " / "),
+    `Goal Contributions` = Gls + Ast,
+    `Goals / 90` = round(Gls / `90s`, 2),
+    `Assists / 90` = round(Ast / `90s`, 2),
+    `Goal Contributions / 90` = round((Gls + Ast) / `90s`, 2)
+  ) |>
+  select(
+    Player,
+    Age,
+    Squad,
+    League,
+    Position,
+    Gls,
+    Ast,
+    `Goal Contributions`,
+    `Goals / 90`,
+    `Assists / 90`,
+    `Goal Contributions / 90`
+  ) |>
+  rename(Team = Squad, Goals = Gls, Assists = Ast) |>
+  arrange(desc(`Goal Contributions`), desc(Age))
+
+team_choices <- sort(unique(players_table$Team))
+league_choices <- sort(unique(players_table$League))
+position_choices <- sort(unique(players_table$Position))
+```
+
+## Age vs. Goal Contributions {#age-vs-goal-contributions}
+
+**Total observations analyzed:** `r format(n_obs, big.mark = ",")` players.
+
+```{r}
+#| label: fig-age-performance
+#| fig-cap: "Scatterplot of player age versus goal contributions per 90 minutes across Europe's top five leagues, with a LOESS smooth trend line."
+#| warning: false
+#| message: false
+#| echo: false
+#| fig-width: 9
+#| fig-height: 5.5
+
+p <- ggplot(players, aes(x = Age, y = ga_per_90)) +
+  geom_point(alpha = 0.34, color = "#26744f", size = 1.8) +
+  geom_smooth(method = "loess", color = "#e87854", se = TRUE, linewidth = 1.2) +
+  coord_cartesian(ylim = c(0, 2.5)) +
+  scale_x_continuous(breaks = seq(15, 45, by = 5)) +
+  labs(
+    title = "Player Age and Goal Contributions per 90 Minutes",
+    x = "Age (Years)",
+    y = "Goal Contributions per 90 (Gls + Ast / 90s)"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    plot.title = element_text(face = "bold", size = 16, color = "#10231d"),
+    axis.title = element_text(color = "#263a30"),
+    axis.text = element_text(color = "#586b61"),
+    panel.grid.major = element_line(color = "#d5dfd7"),
+    panel.grid.minor = element_blank(),
+    panel.background = element_rect(fill = "#f2f5ef", color = NA),
+    plot.background = element_rect(fill = "#f2f5ef", color = NA)
+  )
+
+p
+```
+
+### Interpreting the Pattern
+
+The scatterplot above displays all `r format(n_obs, big.mark = ",")` player records from the 2025–2026 season. The LOESS smoothing curve indicates a modest peak in average goal contributions in the mid-to-late twenties, followed by a slight decline into the thirties.
+
+**Important note on correlation vs. causation:** This graphic shows an observational association, not a causal relationship. Age itself does not determine a player's goal contribution rate. Factors such as tactical position, team strength, survivor bias (only elite older players remain in top leagues), and role specialization heavily influence these numbers.
 
 ## Project Overview
 
@@ -25,102 +135,210 @@ $$
 
 ::::
 
+## Players and Goal Contributions
+
+Goal contributions are defined as goals plus assists. Use the controls below to search by player name, narrow the age range, and filter by team, league, or position. The default sort is highest total goal contributions.
+
 ```{r}
-#| label: setup-homepage
-#| message: false
-#| warning: false
 #| echo: false
-
-library(readr)
-library(dplyr)
-library(ggplot2)
-library(plotly)
-
-players_raw <- read_csv("data/players_data_light-2025_2026.csv", show_col_types = FALSE)
-
-players <- players_raw |>
-  filter(!is.na(Age), !is.na(Gls), !is.na(Ast), !is.na(`90s`), `90s` > 0) |>
-  mutate(ga_per_90 = (Gls + Ast) / `90s`)
-
-n_obs <- nrow(players)
-
-veteran_standouts <- players_raw |>
-  filter(!is.na(Age), Age >= 33, !is.na(Min), Min >= 450,
-         !is.na(Gls), !is.na(Ast), !is.na(`90s`), `90s` > 0) |>
-  mutate(
-    League = sub("^[a-z]{2} ", "", Comp),
-    ga_per_90 = (Gls + Ast) / `90s`
-  ) |>
-  arrange(desc(ga_per_90)) |>
-  select(Player, Age, Squad, League, Min, Gls, Ast, ga_per_90) |>
-  slice_head(n = 10)
-```
-
-## Age vs. Goal Contributions
-
-**Total observations analyzed:** `r format(n_obs, big.mark = ",")` players.
-
-```{r}
-#| label: fig-age-performance
-#| fig-cap: "Scatterplot of player age versus goal contributions per 90 minutes across Europe's top five leagues, with a LOESS smooth trend line."
 #| warning: false
 #| message: false
-#| echo: false
-#| fig-width: 9
-#| fig-height: 5.5
 
-p <- ggplot(players, aes(x = Age, y = ga_per_90)) +
-  geom_point(
-    aes(text = paste0(
-      "<b>", Player, "</b>",
-      "<br>Age: ", Age,
-      "<br>Squad: ", Squad,
-      "<br>League: ", sub("^[a-z]{2} ", "", Comp),
-      "<br>G+A per 90: ", round(ga_per_90, 2)
-    )),
-    alpha = 0.3, color = "#17422f", size = 1.8
-  ) +
-  geom_smooth(method = "loess", color = "#cf5a3d", se = TRUE, linewidth = 1.2) +
-  coord_cartesian(ylim = c(0, 2.5)) +
-  scale_x_continuous(breaks = seq(15, 45, by = 5)) +
-  labs(
-    title = "Player Age and Goal Contributions per 90 Minutes",
-    x = "Age (Years)",
-    y = "Goal Contributions per 90 (Gls + Ast / 90s)"
-  ) +
-  theme_minimal(base_size = 13) +
-  theme(
-    plot.title = element_text(face = "bold", size = 14),
-    panel.grid.minor = element_blank()
-  )
+player_table_controls <- tagList(
+  div(
+    class = "player-table-controls",
+    div(
+      class = "player-table-search",
+      tags$label("Search players", `for` = "player-search"),
+      tags$input(
+        id = "player-search",
+        type = "search",
+        placeholder = "Search by name",
+        class = "player-table-input"
+      )
+    ),
+    div(
+      class = "player-table-filter-group",
+      tags$label("Min age", `for` = "age-min"),
+      tags$input(id = "age-min", type = "number", min = 15, max = 45, step = 1, placeholder = "Min", class = "player-table-input player-table-number"),
+      tags$label("Max age", `for` = "age-max"),
+      tags$input(id = "age-max", type = "number", min = 15, max = 45, step = 1, placeholder = "Max", class = "player-table-input player-table-number"),
+      tags$label("Team", `for` = "team-filter"),
+      tags$select(
+        id = "team-filter",
+        class = "player-table-input",
+        tags$option(value = "", "All teams"),
+        lapply(team_choices, function(x) tags$option(value = x, x))
+      ),
+      tags$label("League", `for` = "league-filter"),
+      tags$select(
+        id = "league-filter",
+        class = "player-table-input",
+        tags$option(value = "", "All leagues"),
+        lapply(league_choices, function(x) tags$option(value = x, x))
+      ),
+      tags$label("Position", `for` = "position-filter"),
+      tags$select(
+        id = "position-filter",
+        class = "player-table-input",
+        tags$option(value = "", "All positions"),
+        lapply(position_choices, function(x) tags$option(value = x, x))
+      ),
+      tags$button(id = "reset-player-filters", type = "button", class = "player-table-reset", "Reset filters")
+    ),
+    div(
+      class = "player-table-summary",
+      tags$span(id = "matching-player-count", "0 matching players")
+    )
+  ),
+  div(
+    id = "player-table-empty",
+    class = "player-table-empty",
+    hidden = NA,
+    tags$p("No players match the selected filters."),
+    tags$button(id = "empty-reset-player-filters", type = "button", class = "player-table-reset compact", "Reset filters")
+  ),
+  withTags(
+    table(
+      id = "player-goal-contributions-table",
+      class = "cell-border stripe compact hover",
+      thead(
+        tr(
+          lapply(c("Player", "Age", "Team", "League", "Position", "Goals", "Assists", "Goal Contributions", "Goals / 90", "Assists / 90", "Goal Contributions / 90"), th)
+        )
+      ),
+      tbody(
+        lapply(seq_len(nrow(players_table)), function(i) {
+          row <- players_table[i, ]
+          tr(
+            hidden = if (i > 25) NA else NULL,
+            td(row$Player),
+            td(row$Age),
+            td(row$Team),
+            td(row$League),
+            td(row$Position),
+            td(format(row$Goals, big.mark = ",", scientific = FALSE)),
+            td(format(row$Assists, big.mark = ",", scientific = FALSE)),
+            td(format(row$`Goal Contributions`, big.mark = ",", scientific = FALSE)),
+            td(sprintf("%.2f", row$`Goals / 90`)),
+            td(sprintf("%.2f", row$`Assists / 90`)),
+            td(sprintf("%.2f", row$`Goal Contributions / 90`))
+          )
+        })
+      )
+    )
+  ),
+  div(
+    id = "player-table-pagination",
+    class = "player-table-pagination",
+    hidden = NA,
+    tags$span(id = "player-table-page-summary"),
+    div(
+      class = "player-table-page-actions",
+      tags$button(id = "player-table-prev", type = "button", class = "player-table-reset compact", disabled = NA, "Previous"),
+      tags$button(id = "player-table-next", type = "button", class = "player-table-reset compact", "Next")
+    )
+  ),
+  tags$script(HTML("(function() {
+    const table = document.getElementById('player-goal-contributions-table');
+    const rows = Array.from(table.querySelectorAll('tbody tr'));
+    const searchInput = document.getElementById('player-search');
+    const ageMin = document.getElementById('age-min');
+    const ageMax = document.getElementById('age-max');
+    const teamFilter = document.getElementById('team-filter');
+    const leagueFilter = document.getElementById('league-filter');
+    const positionFilter = document.getElementById('position-filter');
+    const resetBtn = document.getElementById('reset-player-filters');
+    const emptyState = document.getElementById('player-table-empty');
+    const countEl = document.getElementById('matching-player-count');
+    const emptyResetBtn = document.getElementById('empty-reset-player-filters');
+    const pagination = document.getElementById('player-table-pagination');
+    const pageSummary = document.getElementById('player-table-page-summary');
+    const previousBtn = document.getElementById('player-table-prev');
+    const nextBtn = document.getElementById('player-table-next');
+    const pageSize = 25;
+    let currentPage = 0;
 
-gp <- ggplotly(p, tooltip = "text")
-if (length(gp$x$data) >= 2) gp$x$data[[2]]$hoverinfo <- "none"
-if (length(gp$x$data) >= 3) gp$x$data[[3]]$hoverinfo <- "none"
+    function refreshTable(resetPage) {
+      if (resetPage) currentPage = 0;
+      const query = (searchInput.value || '').trim().toLowerCase();
+      const minAge = ageMin.value === '' ? null : Number(ageMin.value);
+      const maxAge = ageMax.value === '' ? null : Number(ageMax.value);
+      const teamValue = (teamFilter.value || '').trim();
+      const leagueValue = (leagueFilter.value || '').trim();
+      const positionValue = (positionFilter.value || '').trim();
+      const matchingRows = [];
 
-gp
-```
+      rows.forEach(function(row) {
+        const cells = row.children;
+        const playerName = (cells[0] ? cells[0].textContent : '').trim().toLowerCase();
+        const age = Number((cells[1] ? cells[1].textContent : '').trim()) || 0;
+        const team = (cells[2] ? cells[2].textContent : '').trim();
+        const league = (cells[3] ? cells[3].textContent : '').trim();
+        const position = (cells[4] ? cells[4].textContent : '').trim();
 
-### Interpreting the Pattern
+        const matchesQuery = !query || playerName.includes(query);
+        const matchesMin = minAge === null || age >= minAge;
+        const matchesMax = maxAge === null || age <= maxAge;
+        const matchesTeam = !teamValue || team === teamValue;
+        const matchesLeague = !leagueValue || league === leagueValue;
+        const matchesPosition = !positionValue || position === positionValue;
 
-The scatterplot above displays all `r format(n_obs, big.mark = ",")` player records from the 2025–2026 season. The LOESS smoothing curve indicates a modest peak in average goal contributions in the mid-to-late twenties, followed by a slight decline into the thirties.
+        const showRow = matchesQuery && matchesMin && matchesMax && matchesTeam && matchesLeague && matchesPosition;
+        row.hidden = true;
+        if (showRow) matchingRows.push(row);
+      });
 
-**Important note on correlation vs. causation:** This graphic shows an observational association, not a causal relationship. Age itself does not determine a player's goal contribution rate. Factors such as tactical position, team strength, survivor bias (only elite older players remain in top leagues), and role specialization heavily influence these numbers.
+      const count = matchingRows.length;
+      countEl.textContent = count + ' matching player' + (count === 1 ? '' : 's');
+      const hasMatches = count > 0;
+      const pageCount = Math.ceil(count / pageSize);
+      currentPage = Math.min(currentPage, Math.max(0, pageCount - 1));
+      const firstIndex = currentPage * pageSize;
+      matchingRows.slice(firstIndex, firstIndex + pageSize).forEach(function(row) {
+        row.hidden = false;
+      });
 
-## Veteran Standouts
+      pageSummary.textContent = hasMatches
+        ? 'Showing ' + (firstIndex + 1) + '–' + Math.min(firstIndex + pageSize, count) + ' of ' + count
+        : 'No players to show';
+      previousBtn.disabled = currentPage === 0;
+      nextBtn.disabled = currentPage >= pageCount - 1;
+      pagination.hidden = pageCount <= 1;
+      emptyState.hidden = hasMatches;
+      table.classList.toggle('table-empty', !hasMatches);
+    }
 
-These are the 10 players aged 33 or older with the highest goal contributions per 90, among players who logged at least 450 minutes. The ranking highlights productive veterans across Europe's top five leagues; it does not imply that older players outperform younger players overall.
+    function resetFilters() {
+      searchInput.value = '';
+      ageMin.value = '';
+      ageMax.value = '';
+      teamFilter.value = '';
+      leagueFilter.value = '';
+      positionFilter.value = '';
+      refreshTable(true);
+    }
 
-```{r}
-#| label: tbl-veteran-standouts
-#| echo: false
+    [searchInput, ageMin, ageMax, teamFilter, leagueFilter, positionFilter].forEach(function(el) {
+      el.addEventListener('input', function() { refreshTable(true); });
+      el.addEventListener('change', function() { refreshTable(true); });
+    });
 
-knitr::kable(
-  veteran_standouts,
-  col.names = c("Player", "Age", "Club", "League", "Minutes", "Goals", "Assists", "G+A per 90"),
-  digits = 2,
-  caption = "Top veteran performers in the 2025-2026 season (minimum 450 minutes)."
+    resetBtn.addEventListener('click', resetFilters);
+    emptyResetBtn.addEventListener('click', resetFilters);
+    previousBtn.addEventListener('click', function() {
+      currentPage -= 1;
+      refreshTable(false);
+    });
+    nextBtn.addEventListener('click', function() {
+      currentPage += 1;
+      refreshTable(false);
+    });
+    refreshTable(true);
+  })();"))
 )
+
+player_table_controls
 ```
 
 ### Data Source

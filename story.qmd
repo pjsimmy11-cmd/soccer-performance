@@ -1,15 +1,11 @@
 ---
 title: "When Does Performance Peak?"
-subtitle: "AGE CURVES / POSITIONAL CONTEXT"
+subtitle: "How age and playing position shape goal contributions across Europe's top five leagues."
 ---
 
-## Investigating Peak Age in European Soccer
+<div class="story-page">
 
-A central question in sports analytics is identifying when athletes reach their peak competitive performance. Using data from Europe's top five leagues during the 2025–2026 season, this analysis examines how offensive output relates to age among regular contributors. 
-
-To prevent small playing-time samples from skewing the metric, we restrict our sample to players who accumulated **at least 450 minutes** (equivalent to five full 90-minute matches). This leaves **1,999 qualifying player observations**.
-
-Players are grouped into five standard career stages: **17–20**, **21–24**, **25–28**, **29–32**, and **33+**.
+This 2025–2026 snapshot tracks goals plus assists per 90 minutes across five age bands. The overall distribution and position-level comparisons show why one league-wide “peak age” can be misleading.
 
 ```{r}
 #| label: setup-story
@@ -20,6 +16,8 @@ Players are grouped into five standard career stages: **17–20**, **21–24**, 
 library(readr)
 library(dplyr)
 library(ggplot2)
+library(plotly)
+library(htmltools)
 
 players_raw <- read_csv("data/players_data_light-2025_2026.csv", show_col_types = FALSE)
 
@@ -46,98 +44,372 @@ qualified_players <- players_raw |>
   )
 
 n_story <- nrow(qualified_players)
+league_count <- n_distinct(qualified_players$Comp)
+age_summary <- qualified_players |>
+  group_by(age_group) |>
+  summarise(sample_size = n(), mean_ga = mean(ga_per_90), .groups = "drop")
+
+qualified_players <- qualified_players |>
+  left_join(age_summary |> select(age_group, sample_size), by = "age_group") |>
+  mutate(
+    box_hover = paste0(
+      "Age group: ", age_group,
+      "<br>Metric: ", sprintf("%.4f", ga_per_90), " G+A per 90",
+      "<br>Sample size: ", sample_size
+    )
+  )
+
+position_summary <- qualified_players |>
+  filter(!is.na(pos_label)) |>
+  group_by(pos_label, age_group) |>
+  summarise(
+    sample_size = n(),
+    mean_ga = mean(ga_per_90),
+    .groups = "drop"
+  ) |>
+  mutate(
+    hover = paste0(
+      "Position: ", pos_label,
+      "<br>Age group: ", age_group,
+      "<br>Mean: ", sprintf("%.4f", mean_ga), " G+A per 90",
+      "<br>Sample size: ", sample_size
+    ),
+    mean_label = sprintf("%.4f", mean_ga)
+  )
+
+position_colors <- c(
+  "Forwards" = "#e87854",
+  "Midfielders" = "#26744f",
+  "Defenders" = "#a4d353",
+  "Goalkeepers" = "#68766e"
+)
+
+make_position_plot <- function(data, compare = FALSE) {
+  chart <- ggplot(
+    data,
+    aes(x = .data$age_group, y = .data$mean_ga, fill = .data$pos_label, text = .data$hover)
+  ) +
+    geom_col(width = 0.68, show.legend = FALSE) +
+    geom_text(aes(label = .data$mean_label), vjust = -0.45, size = 3.5, show.legend = FALSE) +
+    scale_fill_manual(values = position_colors, drop = FALSE) +
+    scale_y_continuous(
+      labels = scales::label_number(accuracy = 0.0001),
+      expand = expansion(mult = c(0, 0.2))
+    ) +
+    labs(x = "Age group", y = "Mean G+A per 90") +
+    theme_minimal(base_size = 13) +
+    theme(
+      axis.title = element_text(color = "#263a30", face = "bold"),
+      axis.text = element_text(color = "#35483e", size = 11),
+      panel.grid.major = element_line(color = "#d5dfd7"),
+      panel.grid.minor = element_blank(),
+      panel.background = element_rect(fill = "#ffffff", color = NA),
+      plot.background = element_rect(fill = "#ffffff", color = NA),
+      strip.text = element_text(face = "bold", size = 12, color = "#10231d"),
+      legend.position = "none"
+    )
+
+  if (compare) {
+    chart <- chart + facet_wrap(~pos_label, scales = "free_y", ncol = 2)
+  }
+
+  ggplotly(chart, tooltip = "text", height = if (compare) 600 else 430) |>
+    layout(
+      font = list(family = "DM Sans, sans-serif", color = "#17251f", size = 13),
+      paper_bgcolor = "#ffffff",
+      plot_bgcolor = "#ffffff",
+      hoverlabel = list(
+        bgcolor = "#10231d",
+        bordercolor = "#c8f542",
+        font = list(color = "#ffffff", family = "DM Sans, sans-serif")
+      ),
+      margin = list(l = 62, r = 24, t = 24, b = 62)
+    ) |>
+    config(displayModeBar = FALSE, responsive = TRUE)
+}
 ```
 
-## Aggregate Performance Across Age Groups
+::: {.summary-grid}
+::: {.summary-card}
+<span class="summary-label">QUALIFYING OBSERVATIONS</span>
+<strong>`r format(n_story, big.mark = ",")`</strong>
+<span class="summary-note">Players meeting the minutes threshold</span>
+:::
+::: {.summary-card}
+<span class="summary-label">MINIMUM PLAYING TIME</span>
+<strong>`r format(min(qualified_players$Min), big.mark = ",")` min</strong>
+<span class="summary-note">Five full 90-minute matches</span>
+:::
+::: {.summary-card}
+<span class="summary-label">LEAGUES COVERED</span>
+<strong>`r league_count`</strong>
+<span class="summary-note">European top-five competitions</span>
+:::
+:::
 
-At first glance, an unstratified comparison suggests that overall goal contribution rates remain fairly flat across early adulthood before tapering in older age brackets.
+<details class="methodology">
+<summary>Methodology</summary>
+<p>Players qualify with non-missing age, goals, assists, and playing-time data, positive 90s, and at least 450 minutes played. Goal contributions per 90 are calculated as (goals + assists) / 90s. Age bands are 17–20, 21–24, 25–28, 29–32, and 33+; positions are grouped from the dataset's position codes. The overall chart shows individual-player distributions, while position comparisons use the mean within each age group. Each position panel in the comparison view has its own vertical scale.</p>
+</details>
+
+## Overall Distribution
+
+Each box summarizes player-level goal contributions for one age group; the horizontal line is the median and the diamond is the mean. Hover over a point to see its metric and the age group's sample size.
+
+::: {.chart-card}
+### Goal Contributions per 90 by Age
 
 ```{r}
 #| label: fig-overall-age-groups
-#| fig-cap: "Distribution of goal contributions per 90 across career age brackets. White diamonds mark the group means."
+#| fig-cap: "Boxplots show the distribution; the horizontal line marks the median and diamonds mark the mean."
 #| warning: false
 #| message: false
 #| echo: false
-#| fig-width: 8
-#| fig-height: 4.5
+age_colors <- c("#c8f542", "#9bcf43", "#62a94e", "#26744f", "#e87854")
 
-ggplot(qualified_players, aes(x = age_group, y = ga_per_90, fill = age_group)) +
-  geom_boxplot(outlier.alpha = 0.25, outlier.size = 1.3, show.legend = FALSE) +
-  stat_summary(fun = mean, geom = "point", shape = 23, size = 3, fill = "white", color = "#1d3557") +
-  scale_fill_manual(values = c(
-    "17–20" = "#d8ee70",
-    "21–24" = "#b3cb76",
-    "25–28" = "#6f995b",
-    "29–32" = "#315d40",
-    "33+" = "#cf5a3d"
-  )) +
-  coord_cartesian(ylim = c(0, 1.25)) +
-  labs(
-    title = "Goal Contributions per 90 by Age Group (Overall)",
-    subtitle = paste0("N = ", format(n_story, big.mark = ","), " players with at least 450 minutes played"),
-    x = "Age Bracket",
-    y = "Goal Contributions per 90 (Gls + Ast / 90s)",
-    caption = "Data: 2025–2026 European Top 5 Leagues. Boxplots show quartiles; diamonds indicate group means."
-  ) +
-  theme_minimal(base_size = 12) +
-  theme(
-    plot.title = element_text(face = "bold", size = 14),
-    panel.grid.minor = element_blank()
-  )
+overall_plot <- plot_ly(
+  qualified_players,
+  x = ~age_group,
+  y = ~ga_per_90,
+  type = "box",
+  color = ~age_group,
+  colors = age_colors,
+  text = ~box_hover,
+  hoverinfo = "text",
+  boxpoints = "outliers",
+  line = list(width = 1.5),
+  marker = list(opacity = 0.65, size = 4),
+  showlegend = FALSE
+) |>
+  add_trace(
+    data = age_summary,
+    x = ~age_group,
+    y = ~mean_ga,
+    type = "scatter",
+    mode = "markers",
+    marker = list(symbol = "diamond", size = 11, color = "#10231d", line = list(color = "#ffffff", width = 1.5)),
+    text = ~paste0(
+      "Age group: ", age_group,
+      "<br>Mean: ", sprintf("%.4f", mean_ga), " G+A per 90",
+      "<br>Sample size: ", sample_size
+    ),
+    hoverinfo = "text",
+    showlegend = FALSE
+  ) |>
+  layout(
+    xaxis = list(title = "Age group", categoryorder = "array", categoryarray = levels(qualified_players$age_group), tickfont = list(size = 12)),
+    yaxis = list(title = "Goal contributions per 90", rangemode = "tozero", gridcolor = "#e1e8e2", tickfont = list(size = 12)),
+    hovermode = "closest",
+    font = list(family = "DM Sans, sans-serif", color = "#17251f", size = 13),
+    plot_bgcolor = "#ffffff",
+    paper_bgcolor = "#ffffff",
+    margin = list(l = 72, r = 24, t = 24, b = 62),
+    hoverlabel = list(bgcolor = "#10231d", bordercolor = "#c8f542", font = list(color = "#ffffff", family = "DM Sans, sans-serif"))
+  ) |>
+  config(displayModeBar = FALSE, responsive = TRUE)
+
+overall_plot
 ```
 
-Across all positions combined, the mean goal contribution rate is 0.25 per 90 for players aged 17–20 ($n = 204$), 0.22 for ages 21–24 ($n = 644$) and 25–28 ($n = 678$), 0.21 for ages 29–32 ($n = 339$), and 0.17 for players 33 and older ($n = 134$).
+<p class="chart-caption">Data: 2025–2026 season, top five European leagues. The box shows the spread of player observations; hover details include the age-band sample size.</p>
+:::
 
-## Accounting for Tactical Position
+## Compare by Position
 
-Looking strictly at overall numbers hides a substantial confounding variable: **playing position**. Different positions have fundamentally different tactical duties and age curves.
+Position changes the scale of goal involvement, so use the selector to focus on a role or compare all four roles side by side.
+
+::: {.chart-card .position-card}
+### Goal Contributions by Position
+
+Bars show the mean goal contributions per 90 in each age group. Hover for the exact mean and group sample size.
+
+<div class="position-control">
+  <label for="position-select">Show</label>
+  <select id="position-select" aria-controls="position-views">
+    <option value="all">All positions</option>
+    <option value="forwards">Forwards</option>
+    <option value="midfielders">Midfielders</option>
+    <option value="defenders">Defenders</option>
+    <option value="goalkeepers">Goalkeepers</option>
+  </select>
+</div>
 
 ```{r}
-#| label: fig-position-age-groups
-#| fig-cap: "Mean goal contributions per 90 broken down by player position and age bracket."
+#| label: position-comparison
 #| warning: false
 #| message: false
 #| echo: false
-#| fig-width: 9
-#| fig-height: 5.5
+make_position_description <- function(position) {
+  peak <- position_summary |>
+    filter(.data$pos_label == position) |>
+    slice_max(.data$mean_ga, n = 1, with_ties = FALSE)
 
-ggplot(qualified_players, aes(x = age_group, y = ga_per_90, fill = pos_label)) +
-  stat_summary(fun = mean, geom = "col", alpha = 0.85, show.legend = FALSE) +
-  stat_summary(
-    aes(label = sprintf("%.2f", after_stat(y))),
-    fun = mean,
-    geom = "text",
-    vjust = -0.4,
-    size = 3.2
-  ) +
-  facet_wrap(~pos_label, scales = "free_y") +
-  scale_fill_manual(values = c(
-    "Forwards" = "#cf5a3d",
-    "Midfielders" = "#17422f",
-    "Defenders" = "#86a96e",
-    "Goalkeepers" = "#6c757d"
-  )) +
-  scale_y_continuous(expand = expansion(mult = c(0, 0.18))) +
-  labs(
-    title = "Mean Goal Contributions per 90 by Position and Age Group",
-    subtitle = "Forwards peak in the 29–32 age group; goalkeepers and defenders show little offensive variation.",
-    x = "Age Bracket",
-    y = "Mean G+A per 90",
-    caption = "Data: 2025–2026 season (Min >= 450). Labels show exact mean goal contributions per 90."
-  ) +
-  theme_minimal(base_size = 12) +
-  theme(
-    plot.title = element_text(face = "bold", size = 14),
-    strip.text = element_text(face = "bold", size = 12),
-    panel.grid.minor = element_blank()
+  paste0(
+    position, " have their highest mean in the ", as.character(peak$age_group),
+    " age group (", sprintf("%.4f", peak$mean_ga),
+    " G+A per 90; n = ", peak$sample_size, ")."
   )
+}
+
+position_views <- tagList(
+  tags$div(
+    id = "position-view-all",
+    class = "position-view",
+    tags$p("Compare the four position groups. Each panel uses an independent vertical scale, so compare age patterns within a panel rather than bar heights between positions."),
+    make_position_plot(position_summary, compare = TRUE)
+  )
+)
+
+for (position in levels(position_summary$pos_label)) {
+  position_data <- filter(position_summary, pos_label == position)
+  position_id <- tolower(position)
+  position_views <- tagAppendChild(
+    position_views,
+    tags$div(
+      id = paste0("position-view-", position_id),
+      class = "position-view",
+      style = "display: none;",
+      tags$p(make_position_description(position)),
+      make_position_plot(position_data)
+    )
+  )
+}
+
+tags$div(id = "position-views", class = "position-chart", position_views)
 ```
 
-### Analysis & Key Findings
+<p class="chart-caption">Data: 2025–2026 season, top five European leagues (minimum 450 minutes). Labels and hover details use four decimal places; age groups are chronological. In “All positions,” panels use independent vertical scales.</p>
 
-When we disaggregate by position, the true offensive trajectory becomes clear. For forwards, who carry primary responsibility for goal creation, productivity actually peaks in the **29–32 age bracket** with an average of **0.53 goal contributions per 90 minutes**, compared to 0.49 for ages 25–28, 0.40 for ages 21–24, and 0.48 for veteran forwards aged 33+. Midfielders remain remarkably consistent throughout their twenties and thirties (averaging between 0.23 and 0.28 G+A per 90), while defenders (0.08–0.10) and goalkeepers (near zero) have low goal involvement regardless of age.
+```{=html}
+<script>
+  (() => {
+    const selector = document.getElementById('position-select');
+    const views = document.querySelectorAll('#position-views .position-view');
+    if (!selector || !views.length) return;
 
-The apparent decline in the aggregate graph is largely an artifact of **positional composition**. Goalkeepers make up 19.4% of all qualifying players aged 33+, but represent under 2% of players aged 17–20. Because goalkeepers and central defenders have longer careers than outfield sprinters, older age brackets naturally contain a much higher proportion of defensive players who rarely score, depressing the overall group average.
+    function showPositionView() {
+      const selected = selector.value;
+      views.forEach((view) => {
+        const active = view.id === `position-view-${selected}`;
+        view.style.display = active ? '' : 'none';
+        if (active) {
+          view.querySelectorAll('.js-plotly-plot').forEach((plot) => {
+            if (window.Plotly) window.Plotly.Plots.resize(plot);
+          });
+        }
+      });
+    }
+
+    selector.addEventListener('change', showPositionView);
+  })();
+</script>
+```
+:::
+
+</div>
+
+## Standout Veterans
+
+```{=html}
+<section class="veteran-spotlight" aria-label="Lionel Messi standout veteran highlights">
+  <div class="veteran-spotlight__media" aria-hidden="true">
+    <iframe
+      id="veteran-video"
+      class="veteran-spotlight__video"
+      src="https://www.youtube.com/embed/ONDoxgXEMYk?autoplay=1&mute=1&loop=1&playlist=ONDoxgXEMYk&controls=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1"
+      title="Lionel Messi's best moments at the 2026 FIFA World Cup"
+      allow="autoplay; encrypted-media; picture-in-picture"
+      allowfullscreen
+      loading="eager"
+    ></iframe>
+  </div>
+  <div class="veteran-spotlight__overlay"></div>
+  <div class="veteran-spotlight__content">
+    <p class="veteran-spotlight__eyebrow">Standout veterans / Argentina</p>
+    <h3>Lionel Messi</h3>
+    <p class="veteran-spotlight__intro">A look at the moments, vision, and attacking craft that have kept one of soccer's defining players at the center of the game.</p>
+    <div class="home-hero__actions">
+      <button class="home-hero__button home-hero__button--secondary" id="veteran-video-toggle" type="button" aria-label="Pause background video" hidden>Pause</button>
+      <a class="home-hero__button home-hero__button--primary" href="https://www.youtube.com/watch?v=ONDoxgXEMYk" target="_blank" rel="noopener">Watch highlights</a>
+    </div>
+    <p class="veteran-spotlight__note">2026 FIFA World Cup highlights. This feature is separate from the 2025–26 European-league dataset.</p>
+  </div>
+</section>
+
+<script>
+  (function() {
+    const spotlight = document.querySelector('.veteran-spotlight');
+    const frame = document.getElementById('veteran-video');
+    const toggle = document.getElementById('veteran-video-toggle');
+    if (!spotlight || !frame || !toggle) return;
+
+    let player;
+    let fallbackTimer;
+
+    function showFallback() {
+      window.clearTimeout(fallbackTimer);
+      frame.src = 'https://www.youtube.com/embed/ONDoxgXEMYk?controls=1&rel=0&playsinline=1';
+      spotlight.classList.add('veteran-spotlight--playing');
+      toggle.hidden = true;
+    }
+
+    function onPlayerReady() {
+      if (!window.YT || !window.YT.Player) {
+        showFallback();
+        return;
+      }
+
+      player = new window.YT.Player(frame, {
+        events: {
+          onReady: function(event) {
+            event.target.mute();
+            event.target.playVideo();
+          },
+          onStateChange: function(event) {
+            if (event.data === window.YT.PlayerState.PLAYING) {
+              window.clearTimeout(fallbackTimer);
+              spotlight.classList.add('veteran-spotlight--playing');
+              toggle.hidden = false;
+              toggle.textContent = 'Pause';
+              toggle.setAttribute('aria-label', 'Pause background video');
+            } else if (event.data === window.YT.PlayerState.PAUSED) {
+              toggle.textContent = 'Play';
+              toggle.setAttribute('aria-label', 'Play background video');
+            }
+          },
+          onError: showFallback
+        }
+      });
+    }
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      showFallback();
+      return;
+    }
+
+    fallbackTimer = window.setTimeout(showFallback, 12000);
+    window.onYouTubeIframeAPIReady = onPlayerReady;
+
+    toggle.addEventListener('click', function() {
+      if (!player) return;
+      if (player.getPlayerState() === window.YT.PlayerState.PLAYING) {
+        player.pauseVideo();
+      } else {
+        player.playVideo();
+      }
+    });
+
+    if (window.YT && window.YT.Player) {
+      onPlayerReady();
+    } else {
+      const apiScript = document.createElement('script');
+      apiScript.src = 'https://www.youtube.com/iframe_api';
+      apiScript.onerror = showFallback;
+      document.head.appendChild(apiScript);
+    }
+  })();
+</script>
+```
 
 ### Limitations & Causal Considerations
 

@@ -139,11 +139,11 @@ performance_plot <- plot_ly(
     size = ~ifelse(is_featured, 14, 8),
     symbol = ~ifelse(is_featured, "star", "circle"),
     color = ~age_percentile,
-    colorscale = list(c(0, "#d8ee70"), c(0.55, "#6f995b"), c(1, "#10291f")),
+    colorscale = list(c(0, "#c8f542"), c(0.55, "#62b875"), c(1, "#10231d")),
     cmin = 0,
     cmax = 1,
     line = list(color = "#ffffff", width = 1),
-    colorbar = list(title = "Age-peer<br>percentile", tickformat = ".0%")
+    colorbar = list(title = "Age-peer<br>percentile", tickformat = ".0%", tickfont = list(color = "#586b61"))
   ),
   text = ~paste0(
     "<b>", Player, "</b>",
@@ -161,12 +161,14 @@ performance_plot <- plot_ly(
   hoverinfo = "text"
 ) |>
   layout(
-    xaxis = list(title = "Age (years)", dtick = 1, range = c(16.5, 21.5)),
-    yaxis = list(title = "Goal contributions per 90", rangemode = "tozero"),
+    xaxis = list(title = "Age (years)", dtick = 1, range = c(16.5, 21.5), gridcolor = "#d5dfd7", zerolinecolor = "#a9b8ad", tickfont = list(color = "#586b61")),
+    yaxis = list(title = "Goal contributions per 90", rangemode = "tozero", gridcolor = "#d5dfd7", zerolinecolor = "#a9b8ad", tickfont = list(color = "#586b61")),
     hovermode = "closest",
     showlegend = FALSE,
-    plot_bgcolor = "#f4f6f1",
-    paper_bgcolor = "#f4f6f1",
+    plot_bgcolor = "#f2f5ef",
+    paper_bgcolor = "#f2f5ef",
+    font = list(family = "DM Sans, sans-serif", color = "#17251f", size = 12),
+    hoverlabel = list(bgcolor = "#10231d", bordercolor = "#c8f542", font = list(color = "#ffffff", family = "DM Sans, sans-serif")),
     margin = list(l = 65, r = 20, b = 55, t = 24)
   )
 
